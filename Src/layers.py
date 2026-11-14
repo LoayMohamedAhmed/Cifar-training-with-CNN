@@ -66,4 +66,59 @@ class Flatten:
         return self.out
     def parameters(self):
         return []
+
 #--------------------------------------------------------------------
+class Softmax:
+    def __init__(self):
+        # construct a dic that hold all hooks applied to that layer
+        self._forward_hooks = {}
+        self._hook_id = 0
+        
+    def __call__(self,logits):
+        self.out = f.softmax(logits,dim=1)
+        for hook_id , hook_fn in self._forward_hooks.items():
+            hook_result = hook_fn(self, X, self.out)
+            if hook_result is not None:
+                self.out = hook_result
+        return self.out
+        
+    def parameters(self):
+        return []
+
+    def register_forward_hook(self, hook_fn):
+        handle_id = self._hook_id
+        self._forward_hooks[self._hook_id] = hook_fn
+        self._hook_id += 1
+        return handle_id
+#------------------------------------------------------------------
+class Dropout:
+    def __init__(self,dr_rate):
+        self.rate = dr_rate
+        self.state = 1
+        self._forward_hooks = {}
+        self._hook_id = 0
+
+    def __call__(self , X):
+        if self.state:
+            self.mask = torch.rand_like(X)
+            self.out = X * self.mask/(1-self.rate)
+        else:
+            self.out = X
+            self.state = 1
+
+        for hook_id , hook_fn in self._forward_hooks.items():
+            hook_result = hook_fn(self, X, self.out)
+            if hook_result is not None:
+                self.out = hook_result
+        return self.out
+    
+    def parameters(self):
+        return []
+
+    def register_forward_hook(self, hook_fn):
+        handle_id = self._hook_id
+        self._forward_hooks[self._hook_id] = hook_fn
+        self._hook_id += 1
+        return handle_id
+
+#------------------------------------------------------------------------------
