@@ -54,3 +54,41 @@ class Conv2d:
         # to ensure that the data stored in conteguous blocks
         col =  col.contiguous().reshape(C * self.Kw * self.Kh, -1) #to have shape (C*S,N*P)
         return col,out_H, out_W
+
+# ---------------------------------------------------------------------------------------------------------
+class Pooling2d:
+    def __init__(self, kernel_size ,pool_type, stride = None, padding = 0):
+        if isinstance(kernel_size, int):
+            self.Kh = self.Kw = kernel_size
+        else:
+            self.Kh, self.Kw = kernel_size
+        self.ptype = pool_type
+        self.str = stride if stride is not None else kernel_size
+        self.pad = padding
+
+    def parameters(self):
+        return []
+
+    def __call__(self,X):
+        if self.ptype == 'GAP':
+            return X.mean(dim = (-2,-1))
+        N,C,H,W = X.shape
+        X_pad = f.pad(X,(self.pad,)*4,value = 0)
+        out_H = (H + 2*self.pad - self.Kh)//self.str + 1
+        out_W = (W + 2*self.pad - self.Kw)//self.str + 1
+        device = X.device
+        i_offset = torch.arange(self.Kh, device= device).repeat_interleave(self.Kw)
+        j_offset = torch.arange(self.Kw, device= device).repeat(self.Kh)
+
+        i_start = torch.arange(out_H, device= device).repeat_interleave(out_W) *self.str
+        j_start = torch.arange(out_W, device= device).repeat(out_H) * self.str
+
+        i_indices = i_start.reshape(-1,1) + i_offset.reshape(1,-1)
+        j_indices = j_start.reshape(-1,1) + j_offset.reshape(1,-1)
+
+        col = X_pad[:, : , i_indices,j_indices] # shape(N,C,P,S)
+        if self.ptype == 'MAX':
+            out = (col.max(dim =-1))[0].reshape(N,C,out_H,out_W)
+        elif self.ptype == 'AVG':
+            out = (col.mean(dim = -1)).reshape(N,C,out_H,out_W)
+        return out
