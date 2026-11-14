@@ -213,20 +213,21 @@ class Sequential:
         return self.out  
         
     def parameters(self):
-        param_exist = {}
+        layer_exist = {}
         param = {}
-        def param_discover(module,l_name):
-            name = l_name + '.' + module.__class__.__name__
+        def param_discover(module,parent_name):
+            module_name = module.__class__.__name__
+            name = (module_name if not parent_name else parent_name + '.' + module_name )
             if isinstance(module , Sequential):
                 for l in module.layers:
                     param_discover(l,name)
             else:
+                if module_name in layer_exist:
+                    layer_exist[module_name] += 1
+                else:
+                    layer_exist[module_name] = 1
                 for k, val in module.parameters().items():
-                    if k in param_exist.keys():
-                        param_exist[k] += 1
-                    else:
-                        param_exist[k] = 1
-                    param[name+'.'+ k +str(param_exist[k])] = val 
+                    param[name+ f'_{layer_exist[module_name]}' +'.'+ k ] = val 
         param_discover(self,'')          
         return param
     
