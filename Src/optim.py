@@ -1,4 +1,5 @@
 import torch
+import math
 class Adams:
     def __init__(self, param, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7,Schedual = None):
         self.Mt = [torch.zeros_like(p) for p in param]
@@ -36,3 +37,41 @@ class Adams:
                 p.sub_(update_step)
                 idx+=1
         self.LR = self.LR if not self.schad else self.schad(epoch)
+
+#----------------------------------------------------------------------------------------------------------
+class LR_schedual:
+    def __init__(self, max_lr,min_lr,decay_rate, step_size, algo_type, warm_up = 5, epochs = None ):
+        self.warmup_lr = np.linspace(min_lr,max_lr,warm_up)
+        self.max_lr = max_lr
+        self.min_lr = min_lr
+        self.decay_rate, self.step_size = decay_rate, step_size
+        self.algo_type, self.warm_up, self.epochs = algo_type, warm_up, epochs
+        
+    def warmup(self,epoch):
+        return self.warmup_lr[epoch]
+
+    def __call__(self, epoch):
+        if algo_type == 'step decay':
+            return self.step_decay(epoch)
+        elif algo_type == 'exponentail':
+            return self.exponential(epoch)
+        elif algo_type == 'cosin':
+            return self.cosin_annealing(epoch)
+        
+    def step_decay(self, epoch):
+        if epoch < self.warm_up:
+          return self.warmup(epoch)  
+        out = self.max_lr * self.decay_rate**math.floor((epoch-self.warm_up)/self.step_size)
+        return out
+
+    def exponential(self, epoch):
+        if epoch < self.warm_up:
+          return self.warmup(epoch) 
+        out = self.max_lr * math.exp(-self.decay_rate * (epoch-self.warm_up))
+        return out
+        
+    def cosin_annealing(self, epoch):
+        if epoch < self.warm_up:
+          return self.warmup(epoch) 
+        out = self.min_lr + 0.5* (self.max_lr - self.min_lr) * (1+math.cos(math.pi*(epoch-self.warm_up)/(self.epochs-self.warm_up)))
+        return out
