@@ -10,7 +10,7 @@ class Adams:
         self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
         self.schad = Schedual
         # compute the ratio between the weight update step size and the current weight
-        self.Update_to_Weight_Ratio = [[] for p in parameters]
+        self.Update_to_Weight_Ratio = [[] for p in param]
        
 
     def __call__(self,epoch):
