@@ -1,3 +1,11 @@
+import numpy as np
+import cv2
+import torch
+import torch.nn.functional as f
+import pandas as pd
+import copy
+g = torch.Generator().manual_seed(2882001)
+
 class Conv2d:
     def __init__(self, num_filters, filter_size, in_channels ,padding = 0, stride = 1, bias = True):
         if isinstance(filter_size, int):# kernel width and hight
