@@ -39,7 +39,7 @@ class Adams:
         self.LR = self.LR if not self.schad else self.schad(epoch)
 
 #----------------------------------------------------------------------------------------------------------
-class LR_schedual:
+class LR_schedule:
     def __init__(self, max_lr,min_lr,decay_rate, step_size, algo_type, warm_up = 5, epochs = None ):
         self.warmup_lr = np.linspace(min_lr,max_lr,warm_up)
         self.max_lr = max_lr
