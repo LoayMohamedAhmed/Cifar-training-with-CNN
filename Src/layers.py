@@ -207,7 +207,7 @@ class Sequential:
     def __call__(self,X):
         self.out = X
         for layer in self.layers:
-            if not self.state and isinstance(layer, (Dropout,BatchNorm, BatchNorm2d )):
+            if not self.state and isinstance(layer, (Dropout, BatchNorm2d )):
                layer.state = 0
             self.out = layer(self.out)
         return self.out  
@@ -222,7 +222,7 @@ class Sequential:
         self.eval()
         for layer in self.layers:
             with torch.no_grad():
-                if isinstance(layer,BatchNorm2d, BatchNorm):
+                if isinstance(layer,BatchNorm2d):
                     layer.state = 0
                 X = layer(X)
             no_param = int(np.sum([p.numel() for p in layer.parameters()]))
