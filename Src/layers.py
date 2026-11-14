@@ -1,5 +1,6 @@
 import torch
 g = torch.Generator().manual_seed(2882001)
+
 class Linear:
     def __init__(self, in_dim , out_dim , bias = True):
         self.W = torch.randn((in_dim , out_dim), generator = g)*(2/in_dim)**0.5
@@ -26,6 +27,8 @@ class Linear:
         self._forward_hooks[self._hook_id] = hook_fn
         self._hook_id += 1
         return handle_id
+
+#--------------------------------------------------------------------------------------------
 
 class ReLU:
     def __init__(self):
@@ -55,3 +58,12 @@ class ReLU:
         self._forward_hooks[self._hook_id] =hook_fn
         self._hook_id+=1
         return handle_id
+
+#-------------------------------------------------------------------
+class Flatten:
+    def __call__(self,X):
+        self.out = X.view(X.shape[0],-1)
+        return self.out
+    def parameters(self):
+        return []
+#--------------------------------------------------------------------
