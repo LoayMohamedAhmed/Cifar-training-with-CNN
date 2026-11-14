@@ -52,11 +52,11 @@ class LR_schedule:
         return self.warmup_lr[epoch]
 
     def __call__(self, epoch):
-        if algo_type == 'step decay':
+        if self.algo_type == 'step decay':
             return self.step_decay(epoch)
-        elif algo_type == 'exponentail':
+        elif self.algo_type == 'exponentail':
             return self.exponential(epoch)
-        elif algo_type == 'cosin':
+        elif self.algo_type == 'cosin':
             return self.cosin_annealing(epoch)
         
     def step_decay(self, epoch):
