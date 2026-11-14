@@ -1,0 +1,38 @@
+import torch
+class Adams:
+    def __init__(self, param, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7,Schedual = None):
+        self.Mt = [torch.zeros_like(p) for p in param]
+        self.St = [torch.zeros_like(p) for p in param]
+        self.step = 0
+        self.param = param
+        self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
+        self.schad = Schedual
+        # compute the ratio between the weight update step size and the current weight
+        self.Update_to_Weight_Ratio = [[] for p in parameters]
+       
+
+    def __call__(self,epoch):
+        self.step +=1
+        t = self.step
+        idx = 0
+        with torch.no_grad():
+            for mt , st , p in zip(self.Mt,self.St,self.param):
+                if p.grad is None:
+                    continue
+                # don't use mt= ..... because pytorch create 
+                #    new tensor of the rsult and make mt point at them
+                mt.copy_( self.B1*mt +(1-self.B1) * p.grad)
+                st.copy_(self.B2 * st  + (1-self.B2) * p.grad.pow(2))
+                # apply correction bias to both mt and st because you intialize them with 0 so they
+                #   will force the network to take artificially tiny baby step.
+                #      This is called being "biased towards zero."
+                mt_hat = mt/(1-self.B1**t)
+                st_hat = st/(1-self.B2**t)
+                # the correction scale up the momentum at intial epochs and by the time t grows
+                #  its effect disappear entirly because the B**t decreases hardly so (1-B**t) will
+                #                be almost 1
+                update_step = self.LR * mt_hat/(torch.sqrt(st_hat)+self.eps)
+                self.Update_to_Weight_Ratio[idx].append(((-update_step).std()/p.std()).log10().item())
+                p.sub_(update_step)
+                idx+=1
+        self.LR = self.LR if not self.schad else self.schad(epoch)
