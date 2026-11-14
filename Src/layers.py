@@ -25,7 +25,7 @@ class Linear:
         return self.out
     
     def parameters(self):
-        return [self.W] + ([self.b] if self.b is not None else [])
+        return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
 
     def register_forward_hook(self, hook_fn):
         handle_id = self._hook_id
@@ -53,7 +53,7 @@ class ReLU:
         return self.out
         
     def parameters(self):
-        return []
+        return {}
         
     # this function responsible for receiving hooks and assign them
     # to that layer and return a handle if you determine todelete 
@@ -88,7 +88,7 @@ class Softmax:
         return self.out
         
     def parameters(self):
-        return []
+        return {}
 
     def register_forward_hook(self, hook_fn):
         handle_id = self._hook_id
@@ -118,7 +118,7 @@ class Dropout:
         return self.out
     
     def parameters(self):
-        return []
+        return {}
 
     def register_forward_hook(self, hook_fn):
         handle_id = self._hook_id
@@ -161,7 +161,7 @@ class BatchNorm2d:
             return self.out
 
     def parameters(self):
-        return [self.gama , self.beta]
+        return {'gama':self.gama , 'beta':self.beta}
 
     def register_forward_hook(self, hook_fn):
         handle_id = self._hook_id
@@ -213,7 +213,22 @@ class Sequential:
         return self.out  
         
     def parameters(self):
-        return [p for layer in self.layers for p in layer.parameters()]
+        param_exist = {}
+        param = {}
+        def param_discover(module,l_name):
+            name = l_name + '.' + module.__class__.__name__
+            if isinstance(module , Sequential):
+                for l in module.layers:
+                    param_discover(l,name)
+            else:
+                for k, val in module.parameters().items():
+                    if k in param_exist.keys():
+                        param_exist[k] += 1
+                    else:
+                        param_exist[k] = 1
+                    param[name+'.'+ k +str(param_exist[k])] = val 
+        param_discover(self,'')          
+        return param
     
     def summary(self,input_size):
         total_param = 0
