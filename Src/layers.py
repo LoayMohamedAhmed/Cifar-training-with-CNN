@@ -175,7 +175,7 @@ class Sequential:
         self.layers = layers
         self.state = 1
         self.module_names = {}
-        for p in [param for layer in self.layers for param in layer.parameters()]:
+        for p in self.parameters().values():
             p.requires_grad = True
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
@@ -213,22 +213,17 @@ class Sequential:
         return self.out  
         
     def parameters(self):
-        layer_exist = {}
+        # this function assign each layer weight with a layer index+layer weight
+        # 0.W , 00.W, 00.b for hierachical structure 
         param = {}
-        def param_discover(module,parent_name):
-            module_name = module.__class__.__name__
-            name = (module_name if not parent_name else parent_name + '.' + module_name )
+        def param_discover(module,prefix = ""):
             if isinstance(module , Sequential):
-                for l in module.layers:
-                    param_discover(l,name)
+                for i , layer in enumerate(module.layers):
+                    param_discover(layer,f"{prefix}{i}.")
             else:
-                if module_name in layer_exist:
-                    layer_exist[module_name] += 1
-                else:
-                    layer_exist[module_name] = 1
                 for k, val in module.parameters().items():
-                    param[name+ f'_{layer_exist[module_name]}' +'.'+ k ] = val 
-        param_discover(self,'')          
+                    param[f"{prefix}{k}"] = val 
+        param_discover(self)          
         return param
     
     def summary(self,input_size):
