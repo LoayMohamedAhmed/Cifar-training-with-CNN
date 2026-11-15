@@ -18,7 +18,7 @@ class Adams:
         t = self.step
         idx = 0
         with torch.no_grad():
-            for mt , st , p in zip(self.Mt,self.St,self.param):
+            for mt , st , p in zip(self.Mt,self.St,self.param.values()):
                 if p.grad is None:
                     continue
                 # don't use mt= ..... because pytorch create 
