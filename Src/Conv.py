@@ -30,7 +30,7 @@ class Conv2d:
         return out
 
     def parameters(self):
-        return [self.W] +([self.b] if self.b is not None else [])
+        return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
 
     def im2col(self,X):
         pad = (self.pad,)*4
