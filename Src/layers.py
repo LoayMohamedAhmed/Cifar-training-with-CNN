@@ -181,11 +181,11 @@ class Sequential:
         best_param = copy.deepcopy(self.parameters())
 
     def load(self,param):
-        if isinstance(param,str):
+        if isinstance(param,(str,Path)):
             # map location tells pytorch to load into the CPU even if the data saved from GPU
             param = torch.load(param, map_location = 'cpu')
         with torch.no_grad():
-            for p, t_p in zip(self.parameters(),param):
+            for p, t_p in zip(self.parameters().values(),param):
                 p.copy_(t_p)
 
     def layer_names(self):
