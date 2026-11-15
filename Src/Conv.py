@@ -75,7 +75,7 @@ class Pooling2d:
         self.pad = padding
 
     def parameters(self):
-        return []
+        return {}
 
     def __call__(self,X):
         if self.ptype == 'GAP':
