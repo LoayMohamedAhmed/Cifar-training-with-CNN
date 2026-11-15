@@ -172,7 +172,7 @@ class BatchNorm2d:
 #---------------------------------------------------------------------------------
 class Sequential:
     def __init__(self, *layers):
-        self.layers = lsit(layers)
+        self.layers = Lsit(layers)
         self.state = 1
         self.module_names = {}
         for p in self.parameters().values():
