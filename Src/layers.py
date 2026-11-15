@@ -70,7 +70,7 @@ class Flatten:
         self.out = X.view(X.shape[0],-1)
         return self.out
     def parameters(self):
-        return []
+        return {}
 
 #--------------------------------------------------------------------
 class Softmax:
