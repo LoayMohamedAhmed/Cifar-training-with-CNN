@@ -184,9 +184,10 @@ class Sequential:
         if isinstance(param,(str,Path)):
             # map location tells pytorch to load into the CPU even if the data saved from GPU
             param = torch.load(param, map_location = 'cpu')
+        current_param = self.parameters()
         with torch.no_grad():
-            for p, t_p in zip(self.parameters().values(),param):
-                p.copy_(t_p)
+            for key , tensor in param.items():
+                current_param[key].copy_(tensor)
 
     def layer_names(self):
         layers = {}
