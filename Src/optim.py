@@ -29,30 +29,35 @@ class Adams:
                 }
 
     def __call__(self,epoch):
-        self.step +=1
-        t = self.step
-        idx = 0
-        with torch.no_grad():
-            for mt , st , p in zip(self.Mt,self.St,self.param.values()):
-                if p.grad is None:
-                    continue
-                # don't use mt= ..... because pytorch create 
-                #    new tensor of the rsult and make mt point at them
-                mt.copy_( self.B1*mt +(1-self.B1) * p.grad)
-                st.copy_(self.B2 * st  + (1-self.B2) * p.grad.pow(2))
-                # apply correction bias to both mt and st because you intialize them with 0 so they
-                #   will force the network to take artificially tiny baby step.
-                #      This is called being "biased towards zero."
-                mt_hat = mt/(1-self.B1**t)
-                st_hat = st/(1-self.B2**t)
-                # the correction scale up the momentum at intial epochs and by the time t grows
-                #  its effect disappear entirly because the B**t decreases hardly so (1-B**t) will
-                #                be almost 1
-                update_step = self.LR * mt_hat/(torch.sqrt(st_hat)+self.eps)
-                self.Update_to_Weight_Ratio[idx].append(((-update_step).std()/p.std()).log10().item())
-                p.sub_(update_step)
-                idx+=1
-        self.LR = self.LR if not self.schad else self.schad(epoch)
+         with torch.no_grad():
+            for group in self.groups:
+                (B1 ,B2), lr, eps = group['betas'], group['lr'], group['eps']
+                for p in group['params']:
+                    # to not update the frozen paramters
+                    if p.grad is None:
+                        continue
+                    t = copy.copy(self.state[p]['step'])
+                    self.state[p]['step'] += 1
+                    mt = self.state[p]['mt']
+                    st = self.state[p]['st']
+                        
+                    # don't use mt= ..... because pytorch creat-
+                    # -new tensor of the rsult and make mt point at them use .copy instead-
+                    # that will compute the values and set a copy of them inside each mt and st tensor inplace
+                    mt.copy_( B1 * mt + (1 - B1) * p.grad)
+                    st.copy_( B2 * st + (1 - B2) * p.grad.pow(2))
+                    
+                    # apply correction bias to both mt and st because you intialize them with 0 so they
+                    #   will force the network to take artificially tiny baby step.
+                    #      This is called being "biased towards zero."
+                    # the correction scale up the momentum at intial epochs and by the time t grows
+                    #  its effect disappear entirly because the B**t decreases hardly so (1-B**t) will
+                    #                be almost 1
+                    mt_hat = mt/(1 - B1**t)
+                    st_hat = st/(1 - B2**t)
+                    
+                    update_step = lr * mt_hat/(torch.sqrt(st_hat)+ eps)
+                    p.sub_(update_step)
 
 #----------------------------------------------------------------------------------------------------------
 class LR_schedule:
