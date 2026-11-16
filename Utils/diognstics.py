@@ -22,7 +22,7 @@ def plot_gradient_flow(model , grad_norm , iterations_per_epochs):
 
     layer_id = 1
     param_id = 0
-    colors = plt.cm.tab10.colors
+    colors = plt.cm.tab20.colors
     
     for layer_idx, layer in enumerate(model.layers):
         params = layer.parameters()
