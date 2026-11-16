@@ -14,7 +14,19 @@ class Adams:
         else:
             self.groups = [{'params': params }]
             self.construct_group_params()
-       
+
+
+    def construct_group_params(self):
+        for group in self.groups:
+            group['lr'] = self.LR if 'lr' not in group else group['lr']
+            group['betas'] = (self.B1,Self.B2) if 'betas' not in group else group['betas']
+            group['eps'] = self.eps if 'eps' not in group else group['eps']
+            for p in group['params']:
+                self.state[id(p)] = {
+                    'step':1,
+                    'mt': torch.zeros_like(p),
+                    'st': torch.zeros_like(p)
+                }
 
     def __call__(self,epoch):
         self.step +=1
