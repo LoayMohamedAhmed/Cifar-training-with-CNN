@@ -95,15 +95,14 @@ class Sequential:
             total_loss/= total_images
         return total_loss
 
-    def EarlyStopping(self, patience_per,val_data):
+    def EarlyStopping(self, patience_per):
         best_val_loss = np.inf
         stop = False
         remaining_period = patience_per
-        def early_stopping():
+        def early_stopping(current_val_loss):
             # in nested function if i don't set nonlocal identifire berfore the nested variable
             # it will treat them as local ones
             nonlocal best_val_loss, stop, remaining_period
-            current_val_loss = self.total_loss(val_data)
             if current_val_loss < best_val_loss:
                 best_val_loss = current_val_loss
                 self.best_param = copy.deepcopy(self.parameters())
@@ -112,5 +111,5 @@ class Sequential:
                 remaining_period -= 1
                 if remaining_period == 0:
                     stop = True
-            return stop, current_val_loss, best_val_loss
+            return stop, best_val_loss
         return early_stopping
