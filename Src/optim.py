@@ -2,6 +2,7 @@ import torch
 import math
 import numpy as np
 from torch.nn import functional as f
+from Src.layers import Softmax
 class Adams:
     def __init__(self, param, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7,Schedual = None):
         self.Mt = [torch.zeros_like(p) for p in param.values()]
@@ -89,6 +90,7 @@ def total_loss_accur(model , data):
     total_loss = 0
     total_images = 0
     accuracy = 0
+    SM = Softmax()
     with torch.no_grad():
         for images,classes in data:
              logits = model(images)
