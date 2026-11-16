@@ -4,24 +4,23 @@ import numpy as np
 from torch.nn import functional as f
 from Src.layers import Softmax
 class Adams:
-    def __init__(params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7 ):
+    def __init__(self, params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7 ):
         self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
         self.state = {}
         if isinstance(params, list):
-            self.groups = param
-            self.construct_group_params()
+            self.groups = params
             
         else:
             self.groups = [{'params': params }]
-            self.construct_group_params()
+        self.construct_group_params()
 
 
     def construct_group_params(self):
         for group in self.groups:
-            group['lr'] = self.LR if 'lr' not in group else group['lr']
-            group['betas'] = (self.B1,Self.B2) if 'betas' not in group else group['betas']
-            group['eps'] = self.eps if 'eps' not in group else group['eps']
-            for p in group['params']:
+            group['lr'] = group.get('lr', self.LR)
+            group['betas'] = group.get('betas', (self.B1, self.B2))
+            group['eps'] = group.get('eps', self.eps)
+            for p in group['params'].values():
                 self.state[id(p)] = {
                     'step':1,
                     'mt': torch.zeros_like(p),
@@ -32,14 +31,14 @@ class Adams:
          with torch.no_grad():
             for group in self.groups:
                 (B1 ,B2), lr, eps = group['betas'], group['lr'], group['eps']
-                for p in group['params']:
+                for p in group['params'].values():
                     # to not update the frozen paramters
                     if p.grad is None:
                         continue
-                    t = copy.copy(self.state[p]['step'])
-                    self.state[p]['step'] += 1
-                    mt = self.state[p]['mt']
-                    st = self.state[p]['st']
+                    t = self.state[p]['step']
+                    self.state[id(p)]['step'] += 1
+                    mt = self.state[id(p)]['mt']
+                    st = self.state[id(p)]['st']
                         
                     # don't use mt= ..... because pytorch creat-
                     # -new tensor of the rsult and make mt point at them use .copy instead-
