@@ -1,6 +1,7 @@
 import torch
 import math
 import numpy as np
+from torch.nn import functional as f
 class Adams:
     def __init__(self, param, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7,Schedual = None):
         self.Mt = [torch.zeros_like(p) for p in param.values()]
