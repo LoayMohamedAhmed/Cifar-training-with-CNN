@@ -4,15 +4,16 @@ import numpy as np
 from torch.nn import functional as f
 from Src.layers import Softmax
 class Adams:
-    def __init__(self, param, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7,Schedual = None):
-        self.Mt = [torch.zeros_like(p) for p in param.values()]
-        self.St = [torch.zeros_like(p) for p in param.values()]
-        self.step = 0
-        self.param = param
+    def __init__(params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7 ):
         self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
-        self.schad = Schedual
-        # compute the ratio between the weight update step size and the current weight
-        self.Update_to_Weight_Ratio = [[] for p in param.values()]
+        self.state = {}
+        if isinstance(params, list):
+            self.groups = param
+            self.construct_group_params()
+            
+        else:
+            self.groups = [{'params': params }]
+            self.construct_group_params()
        
 
     def __call__(self,epoch):
