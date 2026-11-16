@@ -83,3 +83,19 @@ def cross_entropy_Loss(logits , classes , weights , lambda_l1 = None,lambda_l2 =
     ridge_penality = 0 if lambda_l2 is None else lambda_l2 * sum((W**2).sum() for W in weights.values())
     loss = cost_W + ridge_penality + lasso_penality 
     return loss , cost_W
+
+def total_loss_accur(model , data):
+   total_loss = 0
+   total_images = 0
+   accuracy = 0
+   with torch.no_grad():
+        for images,classes in data:
+             logits = model(images)
+             pred = torch.argmax(SM(logits),dim = 1)
+             accuracy += (pred == classes).float().sum()
+             loss = f.cross_entropy(logits,classes,reduction='sum')
+             total_loss+=loss.item()
+             total_images += classes.shape[0]
+        accuracy/= (total_images)
+        total_loss/= total_images
+  return total_loss, accuracy*100
