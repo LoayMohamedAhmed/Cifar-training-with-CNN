@@ -3,9 +3,10 @@ import math
 import numpy as np
 from torch.nn import functional as f
 from Src.layers import Softmax
-class Adams:
-    def __init__(self, params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7 ):
+class Adams_W:
+    def __init__(self, params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7, weight_decay =0 ):
         self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
+        self.weight_decay = weight_decay
         self.state = {}
         if isinstance(params, list):
             self.groups = params
@@ -20,6 +21,7 @@ class Adams:
             group['lr'] = group.get('lr', self.LR)
             group['betas'] = group.get('betas', (self.B1, self.B2))
             group['eps'] = group.get('eps', self.eps)
+            group['weight_decay'] = group.get('weight_decay', self.weight_decay)
             for p in group['params'].values():
                 self.state[id(p)] = {
                     'step':1,
@@ -31,6 +33,7 @@ class Adams:
          with torch.no_grad():
             for group in self.groups:
                 (B1 ,B2), lr, eps = group['betas'], group['lr'], group['eps']
+                weight_decay = group['weight_decay']
                 for p in group['params'].values():
                     # to not update the frozen paramters
                     if p.grad is None:
@@ -54,7 +57,9 @@ class Adams:
                     #                be almost 1
                     mt_hat = mt/(1 - B1**t)
                     st_hat = st/(1 - B2**t)
-                    
+
+                    if weight_decay!=0:
+                        p.sub_(p * lr * weight_decay)
                     update_step = lr * mt_hat/(torch.sqrt(st_hat)+ eps)
                     p.sub_(update_step)
 
