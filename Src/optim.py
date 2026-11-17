@@ -83,24 +83,29 @@ class LR_schedule:
         elif self.algo_type == 'cosin':
             return self.cosin_annealing(epoch)
         
-    def step_decay(self, epoch):
-        if epoch < self.warm_up:
-          return self.warmup(epoch)  
-        out = self.max_lr * self.decay_rate**math.floor((epoch-self.warm_up)/self.step_size)
-        return out
+     def sched(self): 
+        def step_decay(max_lr,epoch , min_lr):
+            out = max_lr * self.decay_rate**math.floor((epoch-self.warm_up)/self.step_size)
+            return out
+    
+        def exponential(max_lr , epoch , min_lr):
+            out = max_lr * math.exp(-self.decay_rate * (epoch-self.warm_up))
+            return out
+            
+        def cosin_annealing(max_lr , epoch , min_lr):
+            out = min_lr + 0.5* (max_lr - min_lr) * (1+math.cos(math.pi*(epoch-self.warm_up)/(self.epochs-self.warm_up)))
+            return out
 
-    def exponential(self, epoch):
-        if epoch < self.warm_up:
-          return self.warmup(epoch) 
-        out = self.max_lr * math.exp(-self.decay_rate * (epoch-self.warm_up))
-        return out
-        
-    def cosin_annealing(self, epoch):
-        if epoch < self.warm_up:
-          return self.warmup(epoch) 
-        out = self.min_lr + 0.5* (self.max_lr - self.min_lr) * (1+math.cos(math.pi*(epoch-self.warm_up)/(self.epochs-self.warm_up)))
-        return out
-
+        if self.algo_type == 'step decay':
+            return step_decay
+        elif self.algo_type == 'exponential':
+            return exponential
+        elif self.algo_type == 'cosin':
+            return cosin_annealing
+        else:
+            raise ValueError(f"Unknown algo_type: {self.algo_type}")
+            
+#-----------------------------------------------------------------------------------------
 def cross_entropy_Loss(logits , classes , weights , lambda_l1 = None,lambda_l2 = None ):
     lasso_penality = 0 if lambda_l1 is None else lambda_l1 * sum(torch.abs(W).sum() for W in weights)
     cost_W = f.cross_entropy(logits,classes)
