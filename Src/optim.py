@@ -60,12 +60,17 @@ class Adams:
 
 #----------------------------------------------------------------------------------------------------------
 class LR_schedule:
-    def __init__(self, max_lr,min_lr,decay_rate, step_size, algo_type, warm_up = 5, epochs = None ):
-        self.warmup_lr = np.linspace(min_lr,max_lr,warm_up)
-        self.max_lr = max_lr
-        self.min_lr = min_lr
+    def __init__(self, optimizer, algo_type, epochs, decay_rate = None, step_size = None, warm_up = 5):
+        self.optimizer = optimizer
+        self.warmup_lr = {}
         self.decay_rate, self.step_size = decay_rate, step_size
         self.algo_type, self.warm_up, self.epochs = algo_type, warm_up, epochs
+        self.base_lr = [group['lr'] for group in self.groups]
+        
+        for i, group in enumerate(self.optimizer.groups):
+            max_lr = self.base_lr[i]
+            min_lr = max_lr/10 if algo_type != 'cosin' else 1e-6
+            self.warmup_lr[id(group)] = np.linspace(min_lr ,max_lr, warm_up)
         
     def warmup(self,epoch):
         return self.warmup_lr[epoch]
