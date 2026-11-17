@@ -8,14 +8,15 @@ class Adams_W:
         self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
         self.weight_decay = weight_decay
         self.state = {}
+        # compute the ratio between the weight update step size and the current weight
+        self.Update_to_Weight_Ratio = []
         if isinstance(params, list):
             self.groups = params
             
         else:
             self.groups = [{'params': params }]
         self.construct_group_params()
-        # compute the ratio between the weight update step size and the current weight
-        self.Update_to_Weight_Ratio = []
+       
 
 
     def construct_group_params(self):
