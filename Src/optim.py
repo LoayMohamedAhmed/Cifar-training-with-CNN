@@ -117,18 +117,18 @@ def cross_entropy_Loss(logits , classes , weights , lambda_l1 = None,lambda_l2 =
     return loss , cost_W
 
 def total_loss_accur(model , data):
-    total_loss = 0
+    total_loss = 0.0
     total_images = 0
-    accuracy = 0
-    SM = Softmax()
+    correct = 0
+    model.eval()
     with torch.no_grad():
         for images,classes in data:
              logits = model(images)
-             pred = torch.argmax(SM(logits),dim = 1)
-             accuracy += (pred == classes).float().sum()
              loss = f.cross_entropy(logits,classes,reduction='sum')
+             pred = torch.argmax(logits,dim = 1)
+             correct += (pred == classes).sum().item()
              total_loss+=loss.item()
              total_images += classes.shape[0]
-        accuracy/= (total_images)
-        total_loss/= total_images
-    return total_loss, accuracy*100
+        accuracy = 100 * correct / total_images
+        avg_loss = total_loss / total_images
+    return avg_loss, accuracy
