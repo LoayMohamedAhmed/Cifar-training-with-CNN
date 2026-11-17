@@ -35,7 +35,7 @@ class Adams:
                     # to not update the frozen paramters
                     if p.grad is None:
                         continue
-                    t = self.state[p]['step']
+                    t = self.state[id(p)]['step']
                     self.state[id(p)]['step'] += 1
                     mt = self.state[id(p)]['mt']
                     st = self.state[id(p)]['st']
