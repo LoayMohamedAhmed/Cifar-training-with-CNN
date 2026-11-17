@@ -75,13 +75,16 @@ class LR_schedule:
     def warmup(self,epoch):
         return self.warmup_lr[epoch]
 
-    def __call__(self, epoch):
-        if self.algo_type == 'step decay':
-            return self.step_decay(epoch)
-        elif self.algo_type == 'exponentail':
-            return self.exponential(epoch)
-        elif self.algo_type == 'cosin':
-            return self.cosin_annealing(epoch)
+    def step(self, epoch):
+        sched_ = self.sched()
+        for i, group in enumerate(self.optimizer.groups):
+            max_lr = self.base_lr[i]
+            min_lr = max_lr/10 if self.algo_type != 'cosin' else 1e-6
+            if epoch < self.warm_up:
+                new_lr = self.warmup_lr[id(group)][epoch]
+            else:
+                new_lr =  sched_(max_lr,min_lr ,epoch)
+            group['lr'] = new_lr
         
      def sched(self): 
         def step_decay(max_lr,epoch , min_lr):
