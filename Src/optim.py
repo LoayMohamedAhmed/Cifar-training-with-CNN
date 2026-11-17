@@ -65,7 +65,7 @@ class LR_schedule:
         self.warmup_lr = {}
         self.decay_rate, self.step_size = decay_rate, step_size
         self.algo_type, self.warm_up, self.epochs = algo_type, warm_up, epochs
-        self.base_lr = [group['lr'] for group in self.groups]
+        self.base_lr = [group['lr'] for group in self.optimizer.groups]
         
         for i, group in enumerate(self.optimizer.groups):
             max_lr = self.base_lr[i]
