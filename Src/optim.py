@@ -70,7 +70,7 @@ class LR_schedule:
         for i, group in enumerate(self.optimizer.groups):
             max_lr = self.base_lr[i]
             min_lr = max_lr/10 if algo_type != 'cosin' else 1e-6
-            self.warmup_lr[id(group)] = np.linspace(min_lr ,max_lr, warm_up)
+            self.warmup_lr[i] = np.linspace(min_lr ,max_lr, warm_up)
         
     def warmup(self,epoch):
         return self.warmup_lr[epoch]
@@ -81,9 +81,9 @@ class LR_schedule:
             max_lr = self.base_lr[i]
             min_lr = max_lr/10 if self.algo_type != 'cosin' else 1e-6
             if epoch < self.warm_up:
-                new_lr = self.warmup_lr[id(group)][epoch]
+                new_lr = self.warmup_lr[i][epoch]
             else:
-                new_lr =  sched_(max_lr,min_lr ,epoch)
+                new_lr =  sched_(max_lr ,epoch, min_lr)
             group['lr'] = new_lr
         
     def sched(self): 
