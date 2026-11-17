@@ -14,6 +14,8 @@ class Adams_W:
         else:
             self.groups = [{'params': params }]
         self.construct_group_params()
+        # compute the ratio between the weight update step size and the current weight
+        self.Update_to_Weight_Ratio = []
 
 
     def construct_group_params(self):
@@ -23,6 +25,7 @@ class Adams_W:
             group['eps'] = group.get('eps', self.eps)
             group['weight_decay'] = group.get('weight_decay', self.weight_decay)
             for p in group['params'].values():
+                self.Update_to_Weight_Ratio.append([])
                 self.state[id(p)] = {
                     'step':1,
                     'mt': torch.zeros_like(p),
@@ -31,6 +34,7 @@ class Adams_W:
 
     def __call__(self,epoch):
          with torch.no_grad():
+            idx = 0
             for group in self.groups:
                 (B1 ,B2), lr, eps = group['betas'], group['lr'], group['eps']
                 weight_decay = group['weight_decay']
@@ -58,10 +62,10 @@ class Adams_W:
                     mt_hat = mt/(1 - B1**t)
                     st_hat = st/(1 - B2**t)
 
-                    if weight_decay!=0:
-                        p.sub_(p * lr * weight_decay)
-                    update_step = lr * mt_hat/(torch.sqrt(st_hat)+ eps)
+                    update_step = lr * (mt_hat/(torch.sqrt(st_hat)+ eps) + p * weight_decay)
+                    self.Update_to_Weight_Ratio[idx].append(((-update_step).std()/p.std()).log10().item())
                     p.sub_(update_step)
+                    idx +=1
 
 #----------------------------------------------------------------------------------------------------------
 class LR_schedule:
