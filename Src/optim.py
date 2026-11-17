@@ -86,7 +86,7 @@ class LR_schedule:
                 new_lr =  sched_(max_lr,min_lr ,epoch)
             group['lr'] = new_lr
         
-     def sched(self): 
+    def sched(self): 
         def step_decay(max_lr,epoch , min_lr):
             out = max_lr * self.decay_rate**math.floor((epoch-self.warm_up)/self.step_size)
             return out
