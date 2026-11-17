@@ -33,7 +33,7 @@ class Adams_W:
                     'st': torch.zeros_like(p)
                 }
 
-    def __call__(self,epoch):
+    def __call__(self):
          with torch.no_grad():
             idx = 0
             for group in self.groups:
