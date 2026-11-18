@@ -77,3 +77,15 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.1,steps = 50):
 
     del model.layers[layer_idx]._forward_hooks[hook]
     return pattern
+
+#-------------------------------------------------------------------------------------------------
+def senity_check(data,tr_engine):
+    losses  = []
+    for i in range(len(data)):
+        loss, logits = tr_engine.step(data['images'] , data['classes'])
+        losses.append(loss)
+    plt.plot(losses)
+    plt.xlabel('epochs')
+    plt.ylabel('loss')
+    plt.title('senity check')
+    plt.show()
