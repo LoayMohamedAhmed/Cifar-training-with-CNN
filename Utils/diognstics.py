@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import numpy as np
 from matplotlib import pyplot as plt
 import torch
