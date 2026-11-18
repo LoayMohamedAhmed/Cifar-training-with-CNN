@@ -171,4 +171,5 @@ def max_lr_finder(LRs , data_lr , tr_engine, sched):
     plt.xlabel('learning rate')
     plt.ylabel('losses')
     plt.title('learning rate VS loss')
+    plt.show()
     return 10**LRs[losses.argmin()]
