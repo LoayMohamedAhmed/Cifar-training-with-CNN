@@ -3,6 +3,9 @@ import math
 import numpy as np
 from torch.nn import functional as f
 from Src.layers import Softmax
+from Src.engine import Train_engine
+from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 class Adams_W:
     def __init__(self, params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7, weight_decay =0 ):
@@ -153,3 +156,19 @@ def total_loss_accur(model , data):
         accuracy = 100 * correct / total_images
         avg_loss = total_loss / total_images
     return avg_loss, accuracy
+
+#------------------------------------------------------------------------------------------
+
+def max_lr_finder(LRs , data_lr , tr_engine, sched):
+    losses = []
+    for i, (images, classes) in enumerate(tqdm( data_lr , desc ="lr finder iterations")):
+        sched.set_lr(10**LRs[i])
+        # tr_engine return loss as float not a tensor so no need to use .item()
+        loss, logits = tr_engine.step(images, classes)
+        losses.append(loss)
+    losses = np.array(losses)
+    plt.plot(10**LRs, losses.log())
+    plt.xlabel('learning rate')
+    plt.ylabel('losses')
+    plt.title('learning rate VS loss')
+    return 10**LRs[losses.argmin()]
