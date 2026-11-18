@@ -52,30 +52,50 @@ def plot_gradient_flow(model , grad_norm , iterations_per_epochs, title,x_label 
     plt.grid(True, alpha=0.3)
 
 #---------------------------------------------------------------------------------------
-def gradient_ascent(model, layer_idx,channel_idx,LR = 0.1,steps = 50):
+def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weight=1e-2):
     # freeze the weights as we only ant the gradient of output ith respect to input not the weights
+    # but when we finish we restore the original state of the model
+    model.eval()
+    orig_requires_grad = [p.requires_grad for p in model.parameters().values()]
+    device = model.parameters().values()[0].device
+    
     activation_out = {}
     def hook(module, input, output):
         activation_out['activation'] = output
-    hook = model.layers[layer_idx].register_forward_hook(hook)
+    handler = model.layers[layer_idx].register_forward_hook(hook)
+    
     for param in model.parameters().values():
         param.requires_grad = False
-    pattern = torch.randn((1,3,32,32), generator= g, requires_grad= True)
-    for i in tqdm(range(steps),desc = 'gradient_iterations'):
-        model.eval()
-        model(pattern)
-        output = activation_out['activation'][0,channel_idx].mean()
-        pattern.grad = None
-        output.backward()
-        with torch.no_grad():
-            
-            # normalize the grad to so the step size still robust 
-            grad = pattern.grad / (pattern.grad.std() + 1e-8)
-            pattern += LR * grad
-            # add some regularization to prevent the input from exploding to infinity
-            pattern *= 0.99
-
-    del model.layers[layer_idx]._forward_hooks[hook]
+        
+    # 1. Start from low-variance gray noise instead of loud std=1 noise
+    pattern = torch.randn((1,3,32,32), generator= g, device = device, requires_grad= True) *0.005
+    try:
+        for i in tqdm(range(steps),desc = 'gradient_iterations'):
+            # 2. Random spatial jitter (±2 pixels) to suppress high-frequency static
+            ox, oy = torch.randint(-2, 3, (2,)).tolist()
+            jittered = torch.roll(pattern, shifts=(ox, oy), dims=(2, 3))
+            model(jittered)
+            activation = activation_out['activation'][0,channel_idx].mean()
+            # 3. Total Variation penalty: discourages neighboring pixels from having wildly different colors
+            tv_loss = (
+                ((pattern[:, :, 1:, :] - pattern[:, :, :-1, :]) ** 2).mean() +
+                ((pattern[:, :, :, 1:] - pattern[:, :, :, :-1]) ** 2).mean()
+            )
+            # Maximize activation while minimizing TV noise
+            objective = activation - tv_weight * tv_loss
+            pattern.grad = None
+            output.backward()
+            with torch.no_grad():
+                # normalize the grad to so the step size still robust 
+                grad = pattern.grad / (pattern.grad.std() + 1e-8)
+                pattern += LR * grad
+                # add some regularization to prevent the input from exploding to infinity
+                pattern *= 0.99
+                
+    finally:
+        del model.layers[layer_idx]._forward_hooks[handler]
+        for param, grad_state in zip(model.parameters().values(), orig_requires_grad):
+            param.requires_grad = grad_state
     return pattern
 
 #-------------------------------------------------------------------------------------------------
