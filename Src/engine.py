@@ -8,7 +8,7 @@ class Train_engine:
     def step(self, X, ground_truth):
         # forward pass
         self.model.train()
-        logits = model(X)
+        logits = self.model(X)
         loss = self.loss.compute(logits , ground_truth)
             
         # backward pass
