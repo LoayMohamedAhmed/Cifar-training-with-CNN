@@ -120,7 +120,7 @@ class LR_schedule:
             raise ValueError(f"Unknown algo_type: {self.algo_type}")
             
 #-----------------------------------------------------------------------------------------
-class cross_entropy_Loss
+class cross_entropy_Loss:
     def __init__(self , weights , lambda_l1 = None,lambda_l2 = None ):
         self.weights = weights
         self.l1 = lambda_l1 
