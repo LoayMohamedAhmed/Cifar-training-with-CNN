@@ -68,7 +68,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
         param.requires_grad = False
         
     # 1. Start from low-variance gray noise instead of loud std=1 noise
-    pattern = torch.randn((1,3,32,32), generator= g, device = device, requires_grad= True) *0.005
+    pattern = (torch.randn((1,3,32,32), generator= g, device = device) *0.005).requires_grad_(True)
     try:
         for i in tqdm(range(steps),desc = 'gradient_iterations'):
             # 2. Random spatial jitter (±2 pixels) to suppress high-frequency static
