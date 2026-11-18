@@ -17,7 +17,8 @@ class Conv2d:
         self.fan_in = self.Kw * self.Kh * self.Kd
         self.W = torch.randn((num_filters , self.fan_in), generator= g)*(2/self.fan_in)**0.5 #(f,C*h*W)
         self.b = torch.zeros((num_filters,1)) if bias else None
-        
+        self._forward_hooks = {}
+        self._hook_id = 0
         
     
     def __call__(self,X):
@@ -27,7 +28,18 @@ class Conv2d:
             out_flat += self.b
             
         out = out_flat.reshape(self.W.shape[0],X.shape[0],out_H,out_W).permute(1,0,2,3) # shape(N,cout,H,W)
+        for hook_id , hook_fn in self._forward_hooks.items():
+            hook_result = hook_fn(self, X, out)
+            # overwrite the output if the hook was used to alter the output
+            if hook_result is not None:
+                out = hook_result
         return out
+
+    def register_forward_hook(self,hook_fn):
+        handle_id = self._hook_id
+        self._forward_hooks[self._hook_id] =hook_fn
+        self._hook_id+=1
+        return handle_id
 
     def parameters(self):
         return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
