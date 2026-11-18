@@ -57,7 +57,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
     # but when we finish we restore the original state of the model
     model.eval()
     orig_requires_grad = [p.requires_grad for p in model.parameters().values()]
-    device = model.parameters().values()[0].device
+    device = list(model.parameters().values())[0].device
     
     activation_out = {}
     def hook(module, input, output):
