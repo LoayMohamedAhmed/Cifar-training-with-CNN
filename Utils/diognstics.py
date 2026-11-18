@@ -16,9 +16,8 @@ def plot_gradient_flow(model , grad_norm , iterations_per_epochs):
     # truncate the gradient based on the number of iterartions per epoch to ignore the incomplete epochs where the number of iterations is smaller than the previouse epochs
     # i do this for dynamic sampler but as i train CIFAR, it's a fixed size dataset so the number of iterations  per epoch is constant 
     valid_length = iterations_per_epochs * epochs_num
-    grad_norm_array = [:, :valid_length]
-    avg_grad_2norm = np.array(grad_2norm)
-    avg_grad_2norm = avg_grad_2norm.reshape(-1,epochs_num, iterations_per_epochs).mean(axis = 2)
+    grad_norm_array = grad_norm_array[:, :valid_length]
+    grad_norm_array = grad_norm_array.reshape(-1,epochs_num, iterations_per_epochs).mean(axis = 2)
 
     layer_id = 1
     param_id = 0
@@ -35,7 +34,7 @@ def plot_gradient_flow(model , grad_norm , iterations_per_epochs):
         for i, _ in enumerate(params):
             # first curve gets the legend label
             plt.plot(
-                avg_grad_2norm[param_id],
+                grad_norm_array[param_id],
                 color=color,
                 label=f"{layer.__class__.__name__}{layer_id}" if i==0 else None
                 )
