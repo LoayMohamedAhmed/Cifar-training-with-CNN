@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import torch
 g = torch.Generator().manual_seed(2882001)
 # hook that will catptuer the percentage of dead ReLUs in each layer
 def dead_percentage_hook(name, dead_percent):
