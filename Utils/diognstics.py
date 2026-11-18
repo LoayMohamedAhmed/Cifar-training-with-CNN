@@ -84,7 +84,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
             # Maximize activation while minimizing TV noise
             objective = activation - tv_weight * tv_loss
             pattern.grad = None
-            output.backward()
+            objective.backward()
             with torch.no_grad():
                 # normalize the grad to so the step size still robust 
                 grad = pattern.grad / (pattern.grad.std() + 1e-8)
