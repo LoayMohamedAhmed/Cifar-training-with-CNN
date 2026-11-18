@@ -1,9 +1,8 @@
 class Train_engine:
-    def __init__(self,model, optim , sched,loss):
+    def __init__(self,model, optim , loss):
         self.model = model
         self.parameters = self.model.parameters()
         self.optim = optim
-        self.sched = sched
         self.loss = loss
         
     def step(self, X, ground_truth):
@@ -18,6 +17,5 @@ class Train_engine:
         loss.backward()
             
         # update step 
-        self.sched.step(epoch)
         self.optim()
-        return loss.item(),logits
+        return loss.item() , logits
