@@ -171,7 +171,7 @@ def max_lr_finder(LRs , data_lr , tr_engine, sched):
         loss, logits = tr_engine.step(images, classes)
         losses.append(loss)
     losses = np.array(losses)
-    plt.plot(10**LRs, losses.log())
+    plt.plot(10**LRs, np.log(losses))
     plt.xlabel('learning rate')
     plt.ylabel('losses')
     plt.title('learning rate VS loss')
