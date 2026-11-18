@@ -99,6 +99,10 @@ class LR_schedule:
             else:
                 new_lr =  sched_(max_lr ,epoch, min_lr)
             group['lr'] = new_lr
+
+    def set_lr(self,lr):
+        for group in self.optimizer.groups:
+            group['lr'] =  lr
         
     def sched(self): 
         def step_decay(max_lr,epoch , min_lr):
