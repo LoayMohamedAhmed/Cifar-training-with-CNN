@@ -3,6 +3,7 @@ import math
 import numpy as np
 from torch.nn import functional as f
 from Src.layers import Softmax
+
 class Adams_W:
     def __init__(self, params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7, weight_decay =0 ):
         self.LR , self.B1 , self.B2, self.eps =  LR, B1, B2 , epsilon
@@ -119,12 +120,22 @@ class LR_schedule:
             raise ValueError(f"Unknown algo_type: {self.algo_type}")
             
 #-----------------------------------------------------------------------------------------
-def cross_entropy_Loss(logits , classes , weights , lambda_l1 = None,lambda_l2 = None ):
-    lasso_penality = 0 if lambda_l1 is None else lambda_l1 * sum(torch.abs(W).sum() for W in weights)
-    cost_W = f.cross_entropy(logits,classes)
-    ridge_penality = 0 if lambda_l2 is None else lambda_l2 * sum((W**2).sum() for W in weights.values())
-    loss = cost_W + ridge_penality + lasso_penality 
-    return loss , cost_W
+class cross_entropy_Loss
+    def __init__(self , weights , lambda_l1 = None,lambda_l2 = None ):
+        self.weights = weights
+        self.l1 = lambda_l1 
+        self.l2 = lambda_l2
+        self.lasso = True if self.l1 is not None else False
+        self.ridge = True if self.l2 is not None else False
+        
+    def compute(self, logits , classes):
+        cost_W = f.cross_entropy(logits,classes)
+        lasso_penality = 0 if not self.lasso else self.l1 * sum(torch.abs(W).sum() for W in self.weights.values())
+        ridge_penality = 0 if not self.ridge else self.l2 * sum((W**2).sum() for W in self.weights.values())
+        loss = cost_W + ridge_penality + lasso_penality 
+        return loss
+
+#-------------------------------------------------------------------------------------------
 
 def total_loss_accur(model , data):
     total_loss = 0.0
