@@ -99,7 +99,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
     return pattern
 
 #-------------------------------------------------------------------------------------------------
-def senity_check(data,tr_engine):
+def sanity_check(data,tr_engine):
     losses  = []
     for i in range(len(data['images'])):
         loss, logits = tr_engine.step(data['images'] , data['classes'])
