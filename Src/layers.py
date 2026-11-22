@@ -6,11 +6,17 @@ import pandas as pd
 import copy
 from pathlib import Path
 
-g = torch.Generator().manual_seed(2882001)
+class Handler:
+    def __init__(self, hooks, hook_id):
+        self.hooks = hooks
+        self.hook_id = hook_id
+        
+    def remove(self):
+        del self.hooks[self.hook_id]
 
 class Linear:
-    def __init__(self, in_dim , out_dim , bias = True):
-        self.W = torch.randn((in_dim , out_dim), generator = g)*(2/in_dim)**0.5
+    def __init__(self, in_dim , out_dim , bias = True, generator = None):
+        self.W = torch.randn((in_dim , out_dim), generator = generator)*(2/in_dim)**0.5
         self.b = torch.zeros(out_dim) if bias else None
         self._hook_id = 0
         self._forward_hooks ={}
@@ -30,10 +36,10 @@ class Linear:
         return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
 
     def register_forward_hook(self, hook_fn):
-        handle_id = self._hook_id
+        handler = Handler(self._forward_hooks, self._hook_id)
         self._forward_hooks[self._hook_id] = hook_fn
         self._hook_id += 1
-        return handle_id
+        return handler
 
 #--------------------------------------------------------------------------------------------
 
@@ -61,10 +67,10 @@ class ReLU:
     # to that layer and return a handle if you determine todelete 
     # the hook later
     def register_forward_hook(self,hook_fn):
-        handle_id = self._hook_id
+        handler = Handler(self._forward_hooks, self._hook_id)
         self._forward_hooks[self._hook_id] =hook_fn
         self._hook_id+=1
-        return handle_id
+        return handler
 
 #-------------------------------------------------------------------
 class Flatten:
