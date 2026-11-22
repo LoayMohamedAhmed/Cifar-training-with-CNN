@@ -52,7 +52,7 @@ def plot_gradient_flow(model , grad_norm , iterations_per_epochs, title,x_label 
     plt.grid(True, alpha=0.3)
 
 #---------------------------------------------------------------------------------------
-def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weight=1e-2):
+def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weight=1e-2, generator= None):
     # freeze the weights as we only ant the gradient of output ith respect to input not the weights
     # but when we finish we restore the original state of the model
     model.eval()
@@ -68,7 +68,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
         param.requires_grad = False
         
     # 1. Start from low-variance gray noise instead of loud std=1 noise
-    pattern = (torch.randn((1,3,32,32), generator= g, device = device) *0.005).requires_grad_(True)
+    pattern = (torch.randn((1,3,32,32), generator= generator, device = device) *0.005).requires_grad_(True)
     try:
         for i in tqdm(range(steps),desc = 'gradient_iterations'):
             # 2. Random spatial jitter (±2 pixels) to suppress high-frequency static
@@ -93,7 +93,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
                 pattern *= 0.99
                 
     finally:
-        del model.layers[layer_idx]._forward_hooks[handler]
+        handler.remove()
         for param, grad_state in zip(model.parameters().values(), orig_requires_grad):
             param.requires_grad = grad_state
     return pattern
