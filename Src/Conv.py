@@ -4,10 +4,11 @@ import torch
 import torch.nn.functional as f
 import pandas as pd
 import copy
-g = torch.Generator().manual_seed(2882001)
+from Src.layers import Handler
+
 
 class Conv2d:
-    def __init__(self, num_filters, filter_size, in_channels ,padding = 0, stride = 1, bias = True):
+    def __init__(self, num_filters, filter_size, in_channels ,padding = 0, stride = 1, bias = True, generator = None):
         if isinstance(filter_size, int):# kernel width and hight
             self.Kh = self.Kw = filter_size
         else:
@@ -15,7 +16,7 @@ class Conv2d:
         self.Kd = in_channels #kernel depth
         self.pad, self.str = padding, stride
         self.fan_in = self.Kw * self.Kh * self.Kd
-        self.W = torch.randn((num_filters , self.fan_in), generator= g)*(2/self.fan_in)**0.5 #(f,C*h*W)
+        self.W = torch.randn((num_filters , self.fan_in), generator= generator)*(2/self.fan_in)**0.5 #(f,C*h*W)
         self.b = torch.zeros((num_filters,1)) if bias else None
         self._forward_hooks = {}
         self._hook_id = 0
@@ -36,10 +37,10 @@ class Conv2d:
         return out
 
     def register_forward_hook(self,hook_fn):
-        handle_id = self._hook_id
+        handler = Handler(self._forward_hooks, self._hook_id)
         self._forward_hooks[self._hook_id] =hook_fn
         self._hook_id+=1
-        return handle_id
+        return handler
 
     def parameters(self):
         return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
