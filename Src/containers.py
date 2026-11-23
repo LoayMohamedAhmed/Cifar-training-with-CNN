@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 from Src.layers import BatchNorm2d, Dropout
 from torch.nn import functional as f
+import re
 
 class Sequential:
     def __init__(self, *layers):
@@ -23,7 +24,7 @@ class Sequential:
         if isinstance(param,(str,Path)):
             # map location tells pytorch to load into the CPU even if the data saved from GPU
             param = torch.load(param, map_location = 'cpu')
-        current_param = self.parameters()
+        current_param = self.state_dict()
         with torch.no_grad():
             for key , tensor in param.items():
                 current_param[key].copy_(tensor)
