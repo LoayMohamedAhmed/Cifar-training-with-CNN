@@ -6,6 +6,7 @@ from Src.layers import Softmax
 from Src.engine import Train_engine
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import copy
 
 class Adams_W:
     def __init__(self, params, B1=0.9 , B2 = 0.999, LR = 1e-3  ,epsilon = 1e-7, weight_decay =0 ):
@@ -165,11 +166,16 @@ def total_loss_accur(model , data):
 
 def max_lr_finder(LRs , data_lr , tr_engine, sched):
     losses = []
+    original_param = copy.deepcopy(tr_engine.model.parameters())
     for i, (images, classes) in enumerate(tqdm( data_lr , desc ="lr finder iterations")):
         sched.set_lr(10**LRs[i])
         # tr_engine return loss as float not a tensor so no need to use .item()
         loss, logits = tr_engine.step(images, classes)
         losses.append(loss)
+        
+    # restore the orignal paramters
+    for orig_param, p in zip(original_param , tr_engine.model.parameters()):
+        p.copy_(orig_param)
     losses = np.array(losses)
     plt.plot(10**LRs, np.log(losses))
     plt.xlabel('learning rate')
