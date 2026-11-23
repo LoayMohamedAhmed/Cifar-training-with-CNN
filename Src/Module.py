@@ -1,5 +1,5 @@
 import torch
-import numby
+import numpy as np
 
 class module:
   def __init__(self):
