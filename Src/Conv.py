@@ -43,7 +43,7 @@ class Conv2d:
         return handler
 
     def parameters(self):
-        return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
+        return {'Weight':self.W} | ({'bias':self.b} if self.b is not None else {})
 
     def im2col(self,X):
         pad = (self.pad,)*4
