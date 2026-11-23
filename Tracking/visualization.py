@@ -29,7 +29,7 @@ def display_layer_out(layer_idx , model , image):
     images = out['target'][0].detach().cpu()
     
     # delet hook
-    del target_layer._forward_hooks[hook_handel]
+    hook_handel.remove()
     
     # normalize the images to be within correct range
     mins = torch.amin(images, dim = (-1,-2), keepdim=True)
