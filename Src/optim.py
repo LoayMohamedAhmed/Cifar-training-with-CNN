@@ -29,7 +29,7 @@ class Adams_W:
             group['betas'] = group.get('betas', (self.B1, self.B2))
             group['eps'] = group.get('eps', self.eps)
             group['weight_decay'] = group.get('weight_decay', self.weight_decay)
-            for p in group['params'].values():
+            for p in group['params']:
                 self.Update_to_Weight_Ratio.append([])
                 self.state[id(p)] = {
                     'step':1,
@@ -43,7 +43,7 @@ class Adams_W:
             for group in self.groups:
                 (B1 ,B2), lr, eps = group['betas'], group['lr'], group['eps']
                 weight_decay = group['weight_decay']
-                for p in group['params'].values():
+                for p in group['params']:
                     # to not update the frozen paramters
                     if p.grad is None:
                         continue
@@ -137,8 +137,8 @@ class cross_entropy_Loss:
         
     def compute(self, logits , classes):
         cost_W = f.cross_entropy(logits,classes)
-        lasso_penality = 0 if not self.lasso else self.l1 * sum(torch.abs(W).sum() for W in self.weights.values())
-        ridge_penality = 0 if not self.ridge else self.l2 * sum((W**2).sum() for W in self.weights.values())
+        lasso_penality = 0 if not self.lasso else self.l1 * sum(torch.abs(W).sum() for W in self.weights)
+        ridge_penality = 0 if not self.ridge else self.l2 * sum((W**2).sum() for W in self.weights)
         loss = cost_W + ridge_penality + lasso_penality 
         return loss
 
