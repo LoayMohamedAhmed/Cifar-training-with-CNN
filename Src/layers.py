@@ -148,7 +148,7 @@ class Dropout(module):
 class BatchNorm2d(module):
     def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
         super().__init__()
-        self.state = 1
+        #self.state = 1
         self.B = momentum
         self.gama = torch.ones((1,channel_num,1,1), requires_grad=True)
         self.beta = torch.zeros((1,channel_num,1,1), requires_grad=True)
@@ -161,7 +161,7 @@ class BatchNorm2d(module):
     def __call__(self,X):
             m = X.shape[0]
             #dim = [c for c in range(len(X.shape))]
-            if self.state:
+            if self.train_state:
                 self.mean = X.mean(dim = (0,2,3), keepdim = True)
                 self.std = X.std(dim = (0,2,3), keepdim = True)
                 with torch.no_grad():
@@ -170,7 +170,7 @@ class BatchNorm2d(module):
             else:
                 self.mean = self.RAM
                 self.std = self.RAS
-                self.state = 1
+                #self.state = 1
             self.normalized = (X-self.mean)/(self.std + self.eps)
             self.out = self.normalized * self.gama + self.beta
             for hook_id , hook_fn in self._forward_hooks.items():
@@ -195,7 +195,7 @@ class BatchNorm2d(module):
 class BatchNorm(module):
     def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
         super().__init__()
-        self.state = 1
+        #self.state = 1
         self.B = momentum
         self.gama = torch.ones((1,channel_num), requires_grad=True)
         self.beta = torch.zeros((1,channel_num),requires_grad=True)
@@ -204,9 +204,7 @@ class BatchNorm(module):
         self.RAS = torch.ones((1,channel_num)) # running average standared deviation
         
     def __call__(self,X):
-            m = X.shape[0]
-            #dim = [c for c in range(len(X.shape)-1)]
-            if self.state:
+            if self.train_state:
                 self.mean = X.mean(dim = 0, keepdim = True)
                 self.std = X.std(dim = 0 , keepdim = True)
                 with torch.no_grad():
@@ -215,7 +213,7 @@ class BatchNorm(module):
             else:
                 self.mean = self.RAM
                 self.std = self.RAS
-                self.state = 1
+                #self.state = 1
             self.normalized = (X-self.mean)/(self.std + self.eps)
             self.out = self.normalized * self.gama + self.beta
             return self.out
