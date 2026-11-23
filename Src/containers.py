@@ -9,10 +9,9 @@ from torch.nn import functional as f
 class Sequential:
     def __init__(self, *layers):
         self.layers = list(layers)
-        self.state = 1
+        #self.state = 1
         self.module_names = {}
-        for p in self.parameters():
-            p.requires_grad = True
+        self.enable_gard()
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
 
