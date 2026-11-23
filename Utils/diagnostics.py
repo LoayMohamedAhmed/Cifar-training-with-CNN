@@ -57,15 +57,15 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
     # freeze the weights as we only ant the gradient of output ith respect to input not the weights
     # but when we finish we restore the original state of the model
     model.eval()
-    orig_requires_grad = [p.requires_grad for p in model.parameters().values()]
-    device = list(model.parameters().values())[0].device
+    orig_requires_grad = [p.requires_grad for p in model.parameters()]
+    device = list(model.parameters())[0].device
     
     activation_out = {}
     def hook(module, input, output):
         activation_out['activation'] = output
     handler = model.layers[layer_idx].register_forward_hook(hook)
     
-    for param in model.parameters().values():
+    for param in model.parameters():
         param.requires_grad = False
         
     # 1. Start from low-variance gray noise instead of loud std=1 noise
@@ -95,7 +95,7 @@ def gradient_ascent(model, layer_idx,channel_idx,LR = 0.05,steps = 150, tv_weigh
                 
     finally:
         handler.remove()
-        for param, grad_state in zip(model.parameters().values(), orig_requires_grad):
+        for param, grad_state in zip(model.parameters(), orig_requires_grad):
             param.requires_grad = grad_state
     return pattern
 
