@@ -10,12 +10,10 @@ from Src.Module import module
 class Sequential(module):
     def __init__(self, *modules):
         super().__init__()
-        # assign layers inside sequential as children of it
         self.layers = list(modules)
         # assign layers inside sequential as children of it
         for i, layer in enumerate(self.layers):
             self.add_module(str(i) , layer)
-        #self.state = 1
         self.module_names = {}
         # method inherited from module to enable gradient for parameters 
         self.enable_grad()
@@ -50,8 +48,6 @@ class Sequential(module):
     def __call__(self,X):
         self.out = X
         for layer in self.layers:
-            if not self.state and isinstance(layer, (Dropout, BatchNorm2d )):
-               layer.state = 0
             self.out = layer(self.out)
         return self.out  
         
