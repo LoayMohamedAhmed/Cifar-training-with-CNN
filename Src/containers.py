@@ -46,8 +46,6 @@ class Sequential(module):
                 layers[name] = 1
             self.module_names[id(layer)] = name +' '+ str(layers[name])
                 
-    def train(self):
-        self.state = 1
         
         
     def __call__(self,X):
