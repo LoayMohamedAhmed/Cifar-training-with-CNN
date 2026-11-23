@@ -180,3 +180,36 @@ class BatchNorm2d:
         self._hook_id += 1
         return handle_id
 
+#------------------------------------------------------------------------------------------------------------------
+class BatchNorm:
+    def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
+        self.state = 1
+        self.B = momentum
+        self.gama = torch.ones((1,channel_num))
+        self.beta = torch.zeros((1,channel_num))
+        self.eps = eps
+        self.RAM = torch.zeros((1,channel_num)) # running average mean
+        self.RAS = torch.zeros((1,channel_num)) # running average standared deviation
+        
+    def __call__(self,X):
+            m = X.shape[0]
+            dim = [c for c in range(len(X.shape)-1)]
+            if self.state:
+                self.mean = X.mean(dim = dim, keepdim = True)
+                self.std = X.std(dim = dim , keepdim = True)
+                with torch.no_grad():
+                    self.RAM.copy_(self.B * self.RAM + (1-self.B) * self.mean)
+                    self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std)
+            else:
+                self.mean = self.RAM
+                self.std = self.RAS
+                self.state = 1
+            self.normalized = (X-self.mean)/(self.std + self.eps)
+            self.out = self.normalized * self.gama + self.beta
+            return self.out
+
+    def state_dict(self):
+        return {'weight':self.gama , 'bias':self.beta , 'running_mean' :self.RAM ,'running_var' :self.RAS}
+        
+    def parameters(self):
+        return [self.gama , self.beta]
