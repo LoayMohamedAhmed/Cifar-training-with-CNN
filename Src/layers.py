@@ -33,7 +33,7 @@ class Linear:
         return self.out
     
     def parameters(self):
-        return {'W':self.W} | ({'b':self.b} if self.b is not None else {})
+        return {'weight':self.W} | ({'bias':self.b} if self.b is not None else {})
 
     def register_forward_hook(self, hook_fn):
         handler = Handler(self._forward_hooks, self._hook_id)
@@ -154,7 +154,7 @@ class BatchNorm2d:
             return self.out
 
     def parameters(self):
-        return {'gama':self.gama , 'beta':self.beta}
+        return {'weight':self.gama , 'bias':self.beta}
 
     def register_forward_hook(self, hook_fn):
         handle_id = self._hook_id
