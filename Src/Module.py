@@ -26,12 +26,5 @@ class module:
     self.train(False)
 
   def enable_grad(self):
-    def module_enable_grad(module):
-      leaf = True
-      for child_module in module._modules.values():
-        leaf = False
-        module_enable_grad(child_module)
-      if leaf:
-        for p in module.parameters():
-              p.requires_grad = True
-    module_enable_grad(self)
+    for p in self.parameters():
+      p.requires_grad = True
