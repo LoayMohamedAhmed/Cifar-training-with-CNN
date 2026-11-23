@@ -7,7 +7,7 @@ import copy
 from Src.layers import Handler
 from Src.Module import module
 
-class Conv2d(module):
+class Conv2d:
     def __init__(self, num_filters, filter_size, in_channels ,padding = 0, stride = 1, bias = True, generator = None):
         #super().__init__()
         if isinstance(filter_size, int):# kernel width and hight
