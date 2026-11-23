@@ -2,6 +2,7 @@ from tqdm import tqdm
 import numpy as np
 from matplotlib import pyplot as plt
 import torch
+from Src.layers import ReLU
 
 # hook that will catptuer the percentage of dead ReLUs in each layer
 def dead_percentage_hook(name, dead_percent):
@@ -109,3 +110,38 @@ def sanity_check(data,tr_engine):
     plt.ylabel('loss')
     plt.title('senity check')
     plt.show()
+#---------------------------------------------------------------------------------------------------
+def grad_cam(model, layer_idx, img_ , cls_idx ):
+    model.eval()
+    activation = {}
+    target_size = tuple(img_.shape[-2:])
+    def hook(module,input,output):
+        activation['target'] = output
+        activation['target'].retain_grad()
+    handler = model.layers[layer_idx].register_forward_hook(hook)
+    output = model(img_)[0,cls_idx]
+    activation['target'].grad = None
+    output.backward()
+    handler.remove()
+    # we multiply each channel by its mean so that each one contribute according to its importance
+    # in grad cam we want to visualize the the importance of the feature with respect to specific class
+    # so we only care about the featues that increase the class score so we ignore negative gradients
+    
+    weights = activation['target'].grad.mean(dim=(2,3), keep dim = True) #shape(1,C,1,1)
+    heat_map = weights * activation['target']
+    heat_map = ReLU(heat_map.sum(dim = 1)) #shape(1,W,H)
+    heat_map_resized = torch.nn.functional.interpolate(heat_map.unsqueeze(1), size = target_size, mode = 'bilinear', align_corners = False).squeeze()
+    
+    # normalize the heat map to ensure values within the alid range for an image
+    max = torch.amax(heat_map_resized, dim = (0,1), keep_dim = True)
+    min = torch.amin(heat_map_resized, dim = (0,1), keep_dim = True)
+    heat_map_resized -=  min
+    heat_map_resized /= ((max - min) +1e-8)
+    img_result = img_.squeeze(0).permute(1,2,0).cpu().numpy()
+    # plot the heatmap over image
+    plt.imshow(img_result)
+    plt.imshow(heat_map_resized , cmap = 'jet' , alpha = 0.5)
+    plt.axis('off')
+    plt.colorbar()
+    plt.show()
+    
