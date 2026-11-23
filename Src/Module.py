@@ -7,7 +7,11 @@ class module:
     self._modules = {}
 
   def train(self,mode = True):
-    self.train_state = mode
+    # traverse recursively over the modules in the tree to set their state
+    def module_set_state(module):
+      for child_module in module._modules.values():
+        module_set_state(child_module)
+      module.train_state = mode
 
   def __setattr__(self , name , value):
     if isinstance(value , module):
