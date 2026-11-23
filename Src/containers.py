@@ -5,7 +5,6 @@ from pathlib import Path
 import pandas as pd
 from Src.layers import BatchNorm2d, Dropout
 from torch.nn import functional as f
-import re
 
 class Sequential:
     def __init__(self, *layers):
