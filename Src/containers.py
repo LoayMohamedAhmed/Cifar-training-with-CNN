@@ -14,7 +14,7 @@ class Sequential(module):
         #self.state = 1
         self.module_names = {}
         # method inherited from module to enable gradient for parameters 
-        self.enable_gard()
+        self.enable_grad()
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
         # assign layers inside sequential as children of it
