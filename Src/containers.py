@@ -12,7 +12,6 @@ class Sequential(module):
         super().__init__()
         # assign layers inside sequential as children of it
         self.layers = list(modules)
-        print(self.layers)
         # assign layers inside sequential as children of it
         for i, layer in enumerate(self.layers):
             self.add_module(str(i) , layer)
