@@ -17,6 +17,9 @@ class Sequential(module):
         self.enable_gard()
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
+        # assign layers inside sequential as children of it
+        for i, layer in enumerate(self.layers):
+            self.add_module(str(i) , layer)
 
     def save(self, path):
         torch.save(self.state_dict(), path)
