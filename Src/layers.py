@@ -32,8 +32,11 @@ class Linear:
                 self.out = hook_result
         return self.out
     
-    def parameters(self):
+    def state_dict(self):
         return {'weight':self.W} | ({'bias':self.b} if self.b is not None else {})
+
+    def parameters(self):
+        return [self.W] + ([self.b] if self.b is not None else [])
 
     def register_forward_hook(self, hook_fn):
         handler = Handler(self._forward_hooks, self._hook_id)
@@ -61,6 +64,9 @@ class ReLU:
         return self.out
         
     def parameters(self):
+        return []
+
+    def state_dict(self):
         return {}
         
     # this function responsible for receiving hooks and assign them
@@ -78,6 +84,9 @@ class Flatten:
         self.out = X.view(X.shape[0],-1)
         return self.out
     def parameters(self):
+        return []
+
+    def state_dict(self):
         return {}
 
 #--------------------------------------------------------------------
@@ -87,6 +96,9 @@ class Softmax:
         return self.out
         
     def parameters(self):
+        return []
+
+    def state_dict(self):
         return {}
 #------------------------------------------------------------------
 class Dropout:
@@ -111,6 +123,9 @@ class Dropout:
         return self.out
     
     def parameters(self):
+        return []
+
+    def state_dict(self):
         return {}
 
     def register_forward_hook(self, hook_fn):
@@ -127,8 +142,8 @@ class BatchNorm2d:
         self.gama = torch.ones((1,channel_num,1,1))
         self.beta = torch.zeros((1,channel_num,1,1))
         self.eps = eps
-        self.RAM = 0  # running average mean
-        self.RAS = 0  # running average standared deviation
+        self.RAM = torch.zeros((1,channel_num,1,1))  # running average mean
+        self.RAS = torch.zeros((1,channel_num,1,1))  # running average standared deviation
         self._forward_hooks = {}
         self._hook_id = 0
         
@@ -139,8 +154,8 @@ class BatchNorm2d:
                 self.mean = X.mean(dim = (0,2,3), keepdim = True)
                 self.std = X.std(dim = (0,2,3), keepdim = True)
                 with torch.no_grad():
-                    self.RAM = self.B * self.RAM + (1-self.B) * self.mean
-                    self.RAS = self.B * self.RAS + (1-self.B) * self.std
+                    self.RAM.copy_(self.B * self.RAM + (1-self.B) * self.mean)
+                    self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std)
             else:
                 self.mean = self.RAM
                 self.std = self.RAS
@@ -153,8 +168,11 @@ class BatchNorm2d:
                     self.out = hook_result
             return self.out
 
+    def state_dict(self):
+        return {'weight':self.gama , 'bias':self.beta , 'running_mean' :self.RAM ,'running_var' :self.RAS}
+
     def parameters(self):
-        return {'weight':self.gama , 'bias':self.beta}
+        return [self.gama, self.beta]
 
     def register_forward_hook(self, hook_fn):
         handle_id = self._hook_id
