@@ -42,8 +42,11 @@ class Conv2d:
         self._hook_id+=1
         return handler
 
-    def parameters(self):
+    def state_dict(self):
         return {'Weight':self.W} | ({'bias':self.b} if self.b is not None else {})
+
+    def parameters(self):
+        return [self.W] + ([self.b] if self.b is not None else [])
 
     def im2col(self,X):
         pad = (self.pad,)*4
@@ -86,6 +89,9 @@ class Pooling2d:
         self.ptype = pool_type
         self.str = stride if stride is not None else kernel_size
         self.pad = padding
+
+    def state_dict(self):
+        return {}
 
     def parameters(self):
         return {}
