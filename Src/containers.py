@@ -8,10 +8,11 @@ from torch.nn import functional as f
 from Src.Module import module
 
 class Sequential(module):
-    def __init__(self, *layers):
+    def __init__(self, *modules):
         super().__init__()
         # assign layers inside sequential as children of it
-        self.layers = list(layers)
+        self.layers = list(modules)
+        print(self.layers)
         # assign layers inside sequential as children of it
         for i, layer in enumerate(self.layers):
             self.add_module(str(i) , layer)
