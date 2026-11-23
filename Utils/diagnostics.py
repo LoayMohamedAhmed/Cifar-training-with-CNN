@@ -137,7 +137,7 @@ def grad_cam(model, layer_idx, img_ , cls_idx ):
     min = torch.amin(heat_map_resized, dim = (0,1), keepdim = True)
     heat_map_resized -=  min
     heat_map_resized /= ((max - min) +1e-8)
-    img_result = img_.squeeze(0).permute(1,2,0).cpu().numpy()
+    img_result = img_.squeeze(0).permute(1,2,0).cpu().detach().numpy()
     # plot the heatmap over image
     plt.imshow(img_result)
     plt.imshow(heat_map_resized , cmap = 'jet' , alpha = 0.5)
