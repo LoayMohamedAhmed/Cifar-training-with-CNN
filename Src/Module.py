@@ -17,6 +17,7 @@ class module:
   def __setattr__(self , name , value):
     if isinstance(value , module):
       self.add_modules(name,value)
+    object.__setattr__(self, name, value)
 
   def add_module(self, name, value):
     self._modules[name] = value
