@@ -14,7 +14,7 @@ class Adams_W:
         self.state = {}
         # compute the ratio between the weight update step size and the current weight
         self.Update_to_Weight_Ratio = []
-        if isinstance(params, list):
+        if isinstance(params[0], dict):
             self.groups = params
             
         else:
