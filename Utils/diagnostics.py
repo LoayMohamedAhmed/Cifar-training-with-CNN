@@ -126,10 +126,10 @@ def grad_cam(model, layer_idx, img_ , cls_idx ):
     # we multiply each channel by its mean so that each one contribute according to its importance
     # in grad cam we want to visualize the the importance of the feature with respect to specific class
     # so we only care about the featues that increase the class score so we ignore negative gradients
-    
+    Relu = ReLU()
     weights = activation['target'].grad.mean(dim=(2,3), keepdim = True) #shape(1,C,1,1)
     heat_map = weights * activation['target']
-    heat_map = ReLU(heat_map.sum(dim = 1)) #shape(1,W,H)
+    heat_map = Relu(heat_map.sum(dim = 1)) #shape(1,W,H)
     heat_map_resized = torch.nn.functional.interpolate(heat_map.unsqueeze(1), size = target_size, mode = 'bilinear', align_corners = False).squeeze()
     
     # normalize the heat map to ensure values within the alid range for an image
