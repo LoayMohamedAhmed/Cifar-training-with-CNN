@@ -139,11 +139,11 @@ class BatchNorm2d:
     def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
         self.state = 1
         self.B = momentum
-        self.gama = torch.ones((1,channel_num,1,1))
-        self.beta = torch.zeros((1,channel_num,1,1))
+        self.gama = torch.ones((1,channel_num,1,1), requires_grad=True)
+        self.beta = torch.zeros((1,channel_num,1,1), requires_grad=True)
         self.eps = eps
         self.RAM = torch.zeros((1,channel_num,1,1))  # running average mean
-        self.RAS = torch.zeros((1,channel_num,1,1))  # running average standared deviation
+        self.RAS = torch.ones((1,channel_num,1,1))  # running average standared deviation
         self._forward_hooks = {}
         self._hook_id = 0
         
@@ -185,11 +185,11 @@ class BatchNorm:
     def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
         self.state = 1
         self.B = momentum
-        self.gama = torch.ones((1,channel_num))
-        self.beta = torch.zeros((1,channel_num))
+        self.gama = torch.ones((1,channel_num), requires_grad=True)
+        self.beta = torch.zeros((1,channel_num),requires_grad=True)
         self.eps = eps
         self.RAM = torch.zeros((1,channel_num)) # running average mean
-        self.RAS = torch.zeros((1,channel_num)) # running average standared deviation
+        self.RAS = torch.ones((1,channel_num)) # running average standared deviation
         
     def __call__(self,X):
             m = X.shape[0]
