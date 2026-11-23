@@ -10,3 +10,7 @@ class module:
     
   def eval(self):
     self.train(False)
+
+  def enable_grad(self):
+    for p in self.parameters():
+            p.requires_grad = True
