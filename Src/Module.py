@@ -4,9 +4,17 @@ import numpy as np
 class module:
   def __init__(self):
     self.train_state = True
+    self._modules = {}
 
   def train(self,mode = True):
     self.train_state = mode
+
+  def __setattr__(self , name , value):
+    if isinstance(value , module):
+      self.add_modules(name,value)
+
+  def add_module(self, name, value):
+    self._modules[name] = value
     
   def eval(self):
     self.train(False)
