@@ -9,6 +9,7 @@ from Src.Module import module
 
 class Sequential(module):
     def __init__(self, *layers):
+        super().__init__()
         self.layers = list(layers)
         #self.state = 1
         self.module_names = {}
