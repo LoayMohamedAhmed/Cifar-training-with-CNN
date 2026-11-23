@@ -193,10 +193,10 @@ class BatchNorm:
         
     def __call__(self,X):
             m = X.shape[0]
-            dim = [c for c in range(len(X.shape)-1)]
+            #dim = [c for c in range(len(X.shape)-1)]
             if self.state:
-                self.mean = X.mean(dim = dim, keepdim = True)
-                self.std = X.std(dim = dim , keepdim = True)
+                self.mean = X.mean(dim = 0, keepdim = True)
+                self.std = X.std(dim = 0 , keepdim = True)
                 with torch.no_grad():
                     self.RAM.copy_(self.B * self.RAM + (1-self.B) * self.mean)
                     self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std)
