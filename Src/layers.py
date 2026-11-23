@@ -114,17 +114,15 @@ class Dropout(module):
     def __init__(self,dr_rate):
         super().__init__()
         self.rate = dr_rate
-        self.state = 1
         self._forward_hooks = {}
         self._hook_id = 0
 
     def __call__(self , X):
-        if self.state:
+        if self.train_state:
             self.mask = torch.rand_like(X)
             self.out = X * self.mask/(1-self.rate)
         else:
             self.out = X
-            self.state = 1
 
         for hook_id , hook_fn in self._forward_hooks.items():
             hook_result = hook_fn(self, X, self.out)
@@ -163,10 +161,10 @@ class BatchNorm2d(module):
             #dim = [c for c in range(len(X.shape))]
             if self.train_state:
                 self.mean = X.mean(dim = (0,2,3), keepdim = True)
-                self.std = X.std(dim = (0,2,3), keepdim = True)
+                self.std = X.std(dim = (0,2,3), keepdim = True , correction = False)
                 with torch.no_grad():
                     self.RAM.copy_(self.B * self.RAM + (1-self.B) * self.mean)
-                    self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std)
+                    self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std * (n/(n-1))) # bessel correction 
             else:
                 self.mean = self.RAM
                 self.std = self.RAS
@@ -204,12 +202,14 @@ class BatchNorm(module):
         self.RAS = torch.ones((1,channel_num)) # running average standared deviation
         
     def __call__(self,X):
+            n = X.shape[0]
             if self.train_state:
                 self.mean = X.mean(dim = 0, keepdim = True)
-                self.std = X.std(dim = 0 , keepdim = True)
+                self.std = X.std(dim = 0 , keepdim = True ,correction =False)
+                
                 with torch.no_grad():
                     self.RAM.copy_(self.B * self.RAM + (1-self.B) * self.mean)
-                    self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std)
+                    self.RAS.copy_(self.B * self.RAS + (1-self.B) * self.std * (n/(n-1)) ) # bessel correction 
             else:
                 self.mean = self.RAM
                 self.std = self.RAS
