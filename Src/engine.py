@@ -12,7 +12,7 @@ class Train_engine:
         loss = self.loss.compute(logits , ground_truth)
             
         # backward pass
-        for p in self.parameters.values():
+        for p in self.parameters:
             p.grad = None
         loss.backward()
             
