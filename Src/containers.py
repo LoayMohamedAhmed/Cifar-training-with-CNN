@@ -49,7 +49,7 @@ class Sequential:
             self.out = layer(self.out)
         return self.out  
         
-    def parameters(self):
+    def state_dict(self):
         # this function assign each layer weight with a layer index+layer weight
         # 0.W , 0.0.W, 0.0.b for hierachical structure 
         param = {}
@@ -58,10 +58,26 @@ class Sequential:
                 for i , layer in enumerate(module.layers):
                     param_discover(layer,f"{prefix}{i}.")
             else:
-                for k, val in module.parameters().items():
+                for k, val in module.state_dict().items():
                     param[f"{prefix}{k}"] = val 
+                    
         param_discover(self)          
         return param
+
+    def parameters(self):
+        # this function assign each layer weight with a layer index+layer weight
+        # 0.W , 0.0.W, 0.0.b for hierachical structure 
+        params = []
+        def param_discover(module):
+            if isinstance(module , Sequential):
+                for i , layer in enumerate(module.layers):
+                    param_discover(layer)
+            else:
+                for param in module.parameters():
+                    params.append(param) 
+                    
+        param_discover(self)          
+        return params
     
     def summary(self,input_size):
         total_param = 0
