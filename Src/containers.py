@@ -51,7 +51,7 @@ class Sequential:
         
     def parameters(self):
         # this function assign each layer weight with a layer index+layer weight
-        # 0.W , 00.W, 00.b for hierachical structure 
+        # 0.W , 0.0.W, 0.0.b for hierachical structure 
         param = {}
         def param_discover(module,prefix = ""):
             if isinstance(module , Sequential):
