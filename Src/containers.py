@@ -11,7 +11,7 @@ class Sequential:
         self.layers = list(layers)
         self.state = 1
         self.module_names = {}
-        for p in self.parameters().values():
+        for p in self.parameters():
             p.requires_grad = True
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
@@ -89,7 +89,7 @@ class Sequential:
                 if isinstance(layer,BatchNorm2d):
                     layer.state = 0
                 X = layer(X)
-            no_param = int(np.sum([p.numel() for p in layer.parameters().values()]))
+            no_param = int(np.sum([p.numel() for p in layer.parameters()]))
             layer_type = self.module_names[id(layer)]
             dim = ' , '.join([str(X.shape[i]) for i in range(1,len(X.shape))])
             out_shape = '(nan , ' + f'{dim}' +' )'
