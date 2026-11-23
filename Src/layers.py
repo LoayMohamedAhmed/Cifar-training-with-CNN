@@ -5,6 +5,7 @@ import torch.nn.functional as f
 import pandas as pd
 import copy
 from pathlib import Path
+from Src.Module import module
 
 class Handler:
     def __init__(self, hooks, hook_id):
@@ -14,8 +15,9 @@ class Handler:
     def remove(self):
         del self.hooks[self.hook_id]
 
-class Linear:
+class Linear(module):
     def __init__(self, in_dim , out_dim , bias = True, generator = None):
+        super().__init__()
         self.W = torch.randn((in_dim , out_dim), generator = generator)*(2/in_dim)**0.5
         self.b = torch.zeros(out_dim) if bias else None
         self._hook_id = 0
@@ -46,9 +48,10 @@ class Linear:
 
 #--------------------------------------------------------------------------------------------
 
-class ReLU:
+class ReLU(module):
     def __init__(self):
         # construct a dic that hold all hooks applied to that layer
+        super().__init__()
         self._forward_hooks = {}
         self._hook_id = 0
         
@@ -79,7 +82,10 @@ class ReLU:
         return handler
 
 #-------------------------------------------------------------------
-class Flatten:
+class Flatten(module):
+    def __init__(self):
+        super().__init__()
+        
     def __call__(self,X):
         self.out = X.view(X.shape[0],-1)
         return self.out
@@ -90,7 +96,10 @@ class Flatten:
         return {}
 
 #--------------------------------------------------------------------
-class Softmax:       
+class Softmax(module):
+    def __init__(self):
+        super().__init__()
+        
     def __call__(self,logits):
         self.out = f.softmax(logits,dim=1)
         return self.out
@@ -101,8 +110,9 @@ class Softmax:
     def state_dict(self):
         return {}
 #------------------------------------------------------------------
-class Dropout:
+class Dropout(module):
     def __init__(self,dr_rate):
+        super().__init__()
         self.rate = dr_rate
         self.state = 1
         self._forward_hooks = {}
@@ -135,8 +145,9 @@ class Dropout:
         return handle_id
 
 #------------------------------------------------------------------------------
-class BatchNorm2d:
+class BatchNorm2d(module):
     def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
+        super().__init__()
         self.state = 1
         self.B = momentum
         self.gama = torch.ones((1,channel_num,1,1), requires_grad=True)
@@ -181,8 +192,9 @@ class BatchNorm2d:
         return handle_id
 
 #------------------------------------------------------------------------------------------------------------------
-class BatchNorm:
+class BatchNorm(module):
     def __init__(self,channel_num,eps =1e-8,momentum = 0.999):
+        super().__init__()
         self.state = 1
         self.B = momentum
         self.gama = torch.ones((1,channel_num), requires_grad=True)
