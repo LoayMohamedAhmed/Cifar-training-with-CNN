@@ -5,10 +5,11 @@ import torch.nn.functional as f
 import pandas as pd
 import copy
 from Src.layers import Handler
+from Src.Module import module
 
-
-class Conv2d:
+class Conv2d(module):
     def __init__(self, num_filters, filter_size, in_channels ,padding = 0, stride = 1, bias = True, generator = None):
+        super().__init__()
         if isinstance(filter_size, int):# kernel width and hight
             self.Kh = self.Kw = filter_size
         else:
@@ -80,8 +81,9 @@ class Conv2d:
         return col,out_H, out_W
 
 # ---------------------------------------------------------------------------------------------------------
-class Pooling2d:
+class Pooling2d(module):
     def __init__(self, kernel_size ,pool_type, stride = None, padding = 0):
+        super().__init__()
         if isinstance(kernel_size, int):
             self.Kh = self.Kw = kernel_size
         else:
