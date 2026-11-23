@@ -10,16 +10,18 @@ from Src.Module import module
 class Sequential(module):
     def __init__(self, *layers):
         super().__init__()
+        # assign layers inside sequential as children of it
         self.layers = list(layers)
+        # assign layers inside sequential as children of it
+        for i, layer in enumerate(self.layers):
+            self.add_module(str(i) , layer)
         #self.state = 1
         self.module_names = {}
         # method inherited from module to enable gradient for parameters 
         self.enable_grad()
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
-        # assign layers inside sequential as children of it
-        for i, layer in enumerate(self.layers):
-            self.add_module(str(i) , layer)
+       
 
     def save(self, path):
         torch.save(self.state_dict(), path)
