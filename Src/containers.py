@@ -13,6 +13,7 @@ class Sequential(module):
         self.layers = list(layers)
         #self.state = 1
         self.module_names = {}
+        # method inherited from module to enable gradient for parameters 
         self.enable_gard()
         self.layer_names()
         best_param = copy.deepcopy(self.parameters())
@@ -42,8 +43,6 @@ class Sequential(module):
     def train(self):
         self.state = 1
         
-    def eval(self):
-        self.state = 0
         
     def __call__(self,X):
         self.out = X
