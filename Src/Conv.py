@@ -43,7 +43,7 @@ class Conv2d:
         return handler
 
     def state_dict(self):
-        return {'Weight':self.W} | ({'bias':self.b} if self.b is not None else {})
+        return {'weight':self.W} | ({'bias':self.b} if self.b is not None else {})
 
     def parameters(self):
         return [self.W] + ([self.b] if self.b is not None else [])
