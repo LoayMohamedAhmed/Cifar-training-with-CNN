@@ -166,7 +166,7 @@ def total_loss_accur(model , data):
 
 def max_lr_finder(LRs , data_lr , tr_engine, sched):
     losses = []
-    original_param = copy.deepcopy(tr_engine.model.parameters())
+    original_param = [p.detach().clone() for p in tr_engine.model.state_dict().values()]
     for i, (images, classes) in enumerate(tqdm( data_lr , desc ="lr finder iterations")):
         sched.set_lr(10**LRs[i])
         # tr_engine return loss as float not a tensor so no need to use .item()
@@ -174,8 +174,9 @@ def max_lr_finder(LRs , data_lr , tr_engine, sched):
         losses.append(loss)
         
     # restore the orignal paramters
-    for orig_param, p in zip(original_param , tr_engine.model.parameters()):
-        p.copy_(orig_param)
+    with torch.no_grad():
+        for orig_param, p in zip(original_param , tr_engine.model.state_dict().values()):
+            p.copy_(orig_param)
     losses = np.array(losses)
     plt.plot(10**LRs, np.log(losses))
     plt.xlabel('learning rate')
