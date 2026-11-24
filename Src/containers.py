@@ -18,7 +18,7 @@ class Sequential(module):
         # method inherited from module to enable gradient for parameters 
         self.enable_grad()
         self.layer_names()
-        best_param = copy.deepcopy(self.parameters())
+        best_param = copy.deepcopy(self.state_dict())
        
 
     def save(self, path):
@@ -123,7 +123,7 @@ class Sequential(module):
             nonlocal best_val_loss, stop, remaining_period
             if current_val_loss < best_val_loss:
                 best_val_loss = current_val_loss
-                self.best_param = copy.deepcopy(self.parameters())
+                self.best_param = copy.deepcopy(self.state_dict())
                 remaining_period = patience_per
             else:
                 remaining_period -= 1
