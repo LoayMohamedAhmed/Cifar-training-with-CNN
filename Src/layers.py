@@ -157,7 +157,7 @@ class BatchNorm2d(module):
         self._hook_id = 0
         
     def __call__(self,X):
-            m = X.shape[0]
+            n = X.shape[0]
             #dim = [c for c in range(len(X.shape))]
             if self.train_state:
                 self.mean = X.mean(dim = (0,2,3), keepdim = True)
