@@ -2,6 +2,7 @@ import torch
 from matplotlib import pyplot as plt
 import numpy as np
 import cv2
+from torchvision.utils import make_grid
 
 def visualize_image(image_tensor , title):
     # to seprate the tensor from the computational graph, move it into cpu and finally remove the channel 0
@@ -47,3 +48,27 @@ def display_layer_out(layer_idx , model , image):
              f"activation shape {tuple(out['target'].shape)}"
              )
     plt.show()
+
+#-----------------------------------------------------------------------------------------
+def loss_accuracy_visualization(tr_info,val_info):
+    train_loss , train_accuracy = tr_info['loss'],tr_info['accur']
+    val_loss , val_accuracy = val_info['loss'],val_info['accur']
+    plt.figure(figsize = (10,6))
+    plt.subplot(1,2,1)
+    plt.plot(train_loss,c = '#71d629',linestyle = ':', label = 'Train')
+    plt.plot(val_loss,c = '#c33c6e',linestyle = '-', label = 'Validation')
+    plt.title('val vs tr loss')
+    plt.xlabel('epochs')
+    plt.ylabel('loss')
+    plt.legend()
+    
+    plt.subplot(1,2,2)
+    plt.plot(train_accuracy,c = '#71d629',linestyle = ':', label = 'Train')
+    plt.plot(val_accuracy,c = '#c33c6e',linestyle = '-', label = 'Validation')
+    plt.title('val vs tr accuracy')
+    plt.xlabel('epochs')
+    plt.ylabel('accuracy')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
