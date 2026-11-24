@@ -41,13 +41,13 @@ def display_layer_out(layer_idx , model , image):
     # grid will replicate the single channel we add to conver it to RGB
     grid = make_grid(images, nrow = 16) 
     
-    plt.figure(figsize=(16,8))
+
     plt.imshow(grid[0], cmap= 'viridis')
     plt.axis("off")
     plt.title(f'{model.module_names[id(target_layer)]}\n'
              f"activation shape {tuple(out['target'].shape)}"
              )
-    plt.show()
+
 
 #-----------------------------------------------------------------------------------------
 def loss_accuracy_visualization(tr_info,val_info):
