@@ -17,7 +17,7 @@ def visualize_image(image_tensor , title):
     plt.title(title)
 
 #-------------------------------------------------------------------------------------------
-def display_layer_out(layer_idx , model , image):
+def display_layer_out(ax, layer_idx , model , image):
     
     # construct hook to capture the target layer output
     out = {}
@@ -42,9 +42,9 @@ def display_layer_out(layer_idx , model , image):
     grid = make_grid(images, nrow = 16) 
     
 
-    plt.imshow(grid[0], cmap= 'viridis')
-    plt.axis("off")
-    plt.title(f'{model.module_names[id(target_layer)]}\n'
+    ax.imshow(grid[0], cmap= 'viridis')
+    ax.axis("off")
+    ax.set_title(f'{model.module_names[id(target_layer)]}\n'
              f"activation shape {tuple(out['target'].shape)}"
              )
 
