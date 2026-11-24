@@ -141,7 +141,7 @@ def grad_cam(model, layer_idx, img_ , cls_idx ):
     img_result = img_.squeeze(0).permute(1,2,0).cpu().detach().numpy()
     # plot the heatmap over image
     plt.imshow(img_result)
-    plt.imshow(heat_map_resized , cmap = 'jet' , alpha = 0.5)
+    plt.imshow(heat_map_resized , cmap = 'jet' , alpha = 0.3)
     plt.axis('off')
     plt.colorbar()
     plt.show()
